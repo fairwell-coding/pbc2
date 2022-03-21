@@ -15,25 +15,29 @@ theta_rh = -50 * mV  # threshold at rheobase
 delta_T = 3 * mV  # steepness of action potential
 sigma_u = 1 * mV  # standard deviation for added noise
 
+# define rheobase current
 I_rh = (theta_rh - E_L - delta_T) / R_m  # analytically calculated rheobase current
 rheobase_delta = 0.04 * namp
 I_rh += rheobase_delta  # add a very small additional positive current to lift the minimum above 0 to avoid the saddle point
 
-def __plot_phase_diagram_at_rheobase_current():
+
+def __task_2a():
+    """ task 2a: Plot phase diagram for analytically calculated rheobase current
+    """
+
     u_ = np.linspace(u_reset, theta_rh + 10 * mV, 10000000)
     du_dt = (-(u_ - E_L) + delta_T * np.exp((u_ - theta_rh) / delta_T) + R_m * I_rh) / tau_m
+
     fig, ax = plt.subplots()
     plt.plot(u_ / mV, du_dt, label="Analytically calculated rheobase current")
     plt.grid()
     plt.axhline(color="darkred", linestyle="--", label="Minimum threshold required for rheobase current")
-    ax.set_title('Phase diagram')
+    ax.set_title('task 2a: Phase diagram')
     ax.legend(loc='upper left')
     ax.set_xlabel('u(t) [in mV]')
     ax.set_ylabel('du / dt')
+
     plt.savefig('phase_diagram.pdf')
-
-
-__plot_phase_diagram_at_rheobase_current()
 
 
 def run_sim(initial_state, eqs):
@@ -54,17 +58,21 @@ def run_sim(initial_state, eqs):
 
 
 def __task_2b():
+    """ task 2b: Calculate and plot membrane potentials for different initial membrane potentials.
+    """
+
     eqs = '''
         du / dt = (-(u - E_L) + delta_T * exp((u - theta_rh)/delta_T) + R_m * I_rh) / tau_m : volt
     '''
 
+    # Calculate membrane potentials for different starting conditions
     [time, state1] = run_sim(theta_rh - 1 * mV, eqs)
     [_, state2] = run_sim(theta_rh + 1 * mV, eqs)
     [_, state3] = run_sim(theta_rh + 0.1 * mV, eqs)
 
-    # Comparison of different membrane potential starting conditions
+    # plots
     fig, ax = plt.subplots(3)
-    fig.suptitle('Comparison of starting potentials', fontsize=16)
+    fig.suptitle('task 2b: Comparison of starting potentials', fontsize=16)
 
     ax[0].plot(time, state1 * 1E3, color="forestgreen", label="(i) u_0 = theta_rh - 1mV")
     ax[0].legend(loc='lower right')
@@ -86,25 +94,22 @@ def __task_2b():
     plt.savefig('simulations.pdf')
 
 
-__task_2b()
-
-###########################################################################################################################################
-
-# task 2c
-
-
 def __task_2c():
+    """ task 2c: Observe model behaviour by adding Gaussian noise. Note that each run results in a different result/plot due to its stochastic behaviour.
+    """
+
     eqs = '''
         du / dt = (-(u - E_L) + delta_T * exp((u - theta_rh)/delta_T) + R_m * I_rh) / tau_m + sigma_u * sqrt (2 / tau_m ) * xi : volt
     '''
 
+    # Calculate membrane potentials for different starting conditions with added noise
     [time, state1] = run_sim(theta_rh - 1 * mV, eqs)
     [_, state2] = run_sim(theta_rh + 1 * mV, eqs)
     [_, state3] = run_sim(theta_rh + 0.1 * mV, eqs)
 
-    # Comparison of different membrane potential starting conditions with added noise
+    # plots
     fig, ax = plt.subplots(3)
-    fig.suptitle('Comparison of starting potentials with noise', fontsize=16)
+    fig.suptitle('task 2c: Comparison of starting potentials with noise', fontsize=16)
 
     ax[0].plot(time, state1 * 1E3, color="forestgreen", label="(i) u_0 = theta_rh - 1mV")
     ax[0].legend(loc='lower right')
@@ -123,29 +128,30 @@ def __task_2c():
     ax[2].set_ylabel('u(t) / mV')
 
 
-__task_2c()
-
-###########################################################################################################################################
-
 def __task_2c_3():
+    """ Use same noise input as in task 2c but with external current I(t) = I_rh = 0 and initial membrane potential u_0 = E_L.
+    """
+
     eqs = '''
         du / dt = (-(u - E_L) + delta_T * exp((u - theta_rh)/delta_T)) / tau_m + sigma_u * sqrt (2 / tau_m ) * xi : volt
     '''
 
+    # Calculate membrane potential with I_rh = 0 and u_0 = E_L
     [time, state] = run_sim(E_L, eqs)
 
-    # Comparison of different membrane potential starting conditions with added noise
+    # plot
     fig, ax = plt.subplots()
-    fig.suptitle('I_rh = 0 and u_0 = E_L', fontsize=16)
+    fig.suptitle('task 2c - part III', fontsize=16)
 
-    ax.plot(time, state * 1E3, color="forestgreen", label="u_0 = E_L")
+    ax.plot(time, state * 1E3, color="forestgreen", label="I(t) = 0 and u_0 = E_L")
     ax.legend(loc='lower right')
     ax.set_xlabel('t / ms')
     ax.set_ylabel('u(t) / mV')
 
 
+__task_2a()
+__task_2b()
+__task_2c()
 __task_2c_3()
-
-###########################################################################################################################################
 
 plt.show()
