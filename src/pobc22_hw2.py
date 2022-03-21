@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import brian2
-from brian2 import NeuronGroup, SpikeMonitor, StateMonitor
+from brian2 import NeuronGroup, SpikeMonitor, StateMonitor, namp
 from brian2 import mV, ms, Gohm, second, ms
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +15,8 @@ theta_rh = -50 * mV  # threshold at rheobase
 delta_T = 3 * mV  # steepness of action potential
 
 I_rh = (theta_rh - E_L - delta_T) / R_m  # analytically calculated rheobase current
+rheobase_delta = 0.04 * namp
+I_rh += rheobase_delta  # add a very small additional positive current to lift the minimum above 0 to avoid the saddle point
 
 
 def __plot_phase_diagram_at_rheobase_current():
@@ -76,7 +78,7 @@ ax[1].set_ylabel('u(t) / mV')
 ax[1].set_yticks([-80, -60, -40])
 
 ax[2].plot(time, state3 * 1E3, color="forestgreen", label="(iii) u_0 = theta_rh + 0.1mV")
-ax[2].legend(loc='upper left')
+ax[2].legend(loc='lower right')
 ax[2].set_xlabel('t / ms')
 ax[2].set_ylabel('u(t) / mV')
 
